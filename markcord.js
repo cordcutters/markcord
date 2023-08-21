@@ -122,7 +122,6 @@ ${p1}
                 console.log(rule[0])
                 while (cleaned.match(rule[0]) !== null) {
                     cleaned = cleaned.replaceAll(...rule)
-                    console.log(cleaned)   
                 }
             })
         })
