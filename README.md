@@ -1,2 +1,3 @@
 # markcord
-Discord-like markdown parser
+Discord-like markdown parser for the web, written in JavaScript
+
