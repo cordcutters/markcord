@@ -30,7 +30,7 @@ If you want to play around with the library, you can do it with [Markcord Playgr
 
 To start out, include the markcord.js script and the style.css stylesheet in the head of your HTML:
 ```html
-<script src="https://cordcutters.github.io/markcord/markcord.js">
+<script src="https://cordcutters.github.io/markcord/markcord.js"></script>
 <link href="https://cordcutters.github.io/markcord/style.css" rel="stylesheet" type="text/css" />
 ```
 To parse some content, you can use the `markcord.parse` function:
