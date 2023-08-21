@@ -119,7 +119,9 @@ ${p1}
         window.__markcord_other_text = cleaned.replaceAll(this.regexRules.emoji[0], "").trim() !== ""
         this.rulesets.forEach(ruleset => {
             ruleset.forEach(rule => {
-                while (cleaned.match(rule[0]) !== null) {
+                let previous = "";
+                while (previous !== cleaned) {
+                    previous = cleaned
                     cleaned = cleaned.replaceAll(...rule)
                 }
             })
