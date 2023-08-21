@@ -23,6 +23,8 @@ Most modern browsers should be able to support this parser, though it requires l
 
 The default css file also uses the `:has` pseudoselector for determining if there are too much discord emojis ([see browser support here](https://caniuse.com/css-has))
 
+Some elements (such as emojis, spoilers or URLs) may function incorrectly if JavaScript is disabled.
+
 # Using the library
 If you want to play around with the library, you can do it with [Markcord Playground](https://cordcutters.github.io/markcord/), it will dynamically parse your markdown on input and shows you the source and how it looks like
 
@@ -65,3 +67,28 @@ Class names markcord uses:
 - `markcord-revealed` (used for revealed spoilers alongside `markcord-spoiler`)
 
 The default stylesheet can be found [here](https://github.com/cordcutters/markcord/blob/main/style.css)
+### Overriding event behaviour
+By default, the library sets some events for elements such as emojis, spoiler or URLs to implement certain behaviours.
+
+You can override those functions:
+```javascript
+markcord.emoteError = function (self) {
+  self.replaceWith(document.createTextNode(`:${self.attributes.name.value}:`));
+  // This function gets called if an error with the image element occurs.
+  // Most likely, this gets caused by the image failing to load (invalid emoji id provided)
+  // The default function replaces it with :name:
+};
+
+markcord.interceptLink = function (self, event) {
+  // This function is called when a link or a masked link is clicked.
+  // By default, this function does not do anything.
+}
+
+markcord.revealSpoiler = function (self) {
+  if (!self.className.includes("markcord-revealed")) {
+    self.className += " markcord-revealed";
+  };
+  // This function is called when a spoiler is clicked.
+  // By default, it adds the markcord-revealed class to the element if it does not have it.
+}
+```
