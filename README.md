@@ -1,5 +1,5 @@
 # markcord
-Discord-like markdown parser for the web, written in JavaScript
+Simple, Discord-like regex markdown parser for the web, written in JavaScript
 
 # Supported features
 - Headers (`#` at the start)
@@ -17,3 +17,7 @@ Discord-like markdown parser for the web, written in JavaScript
 - Ordered lists
 - Channel/User/Role/Slash Command mentions (`<#channel_id>`, `<@user_id>`, `<@&role_id>`, `</name:command_id>`)
 - Codeblocks (\` or \`\`\` at both sides)
+
+# Browser support
+Most modern browsers should be able to support this parser, though it requires lookbehind assertions ([see browser support here](https://caniuse.com/js-regexp-lookbehind))
+The default css file also uses the `:has` pseudoselector for determining if there are too much discord emojis ([see browser support here](https://caniuse.com/css-has))
