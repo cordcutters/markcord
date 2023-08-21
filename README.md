@@ -92,3 +92,31 @@ markcord.revealSpoiler = function (self) {
   // By default, it adds the markcord-revealed class to the element if it does not have it.
 }
 ```
+
+### Using parsed content in other places
+If you want to use the parsed content without including the Markcord script, some elements will break:
+
+spoilers will not work without the script, emojis will not get replaced in case of an error while loading the image, link clicks will not be intercepted.
+
+If you want to retain this functionality, you can make markcord as an object:
+```javascript
+const markcord = {};
+```
+and add the code from the above section to include the event handler functions.
+
+
+Using the parsed content without the stylesheet will likely render elements in a wrong way,
+
+if you do not wish to include the Markcord stylesheet, you could include the code from it in your own stylesheet.
+
+### Changing regex rules
+If you wish to exclude / include some regex rules, you can change the `markcord.rulesets` array.
+
+The `markcord.rulesets` array contains any amount of arrays which contain arrays with two elements: the regular expression and the [callback](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_function_as_the_replacement).
+
+All of the regex rules used can be found in `markcord.regexRules`.
+
+### Miscellaneous options
+- `markcord.cdn`: The CDN to load discord emojis from, defaults to `https://cdn.discordapp.com`
+- `markcord.headerOffset`: Offset for header numbers, defaults to `1` (the bigger this value, the smaller the headers)
+- `markcord.cleaner`: The HTML element used for cleaning text. You should not change this value unless you know what you are doing.
