@@ -23,7 +23,7 @@ Most modern browsers should be able to support this parser, though it requires l
 
 The default css file also uses the `:has` pseudoselector for determining if there are too much discord emojis ([see browser support here](https://caniuse.com/css-has))
 
-# Using the parser
+# Using the library
 If you want to play around with the library, you can do it with [Markcord Playground](https://cordcutters.github.io/markcord/), it will dynamically parse your markdown on input and shows you the source and how it looks like
 
 To start out, include the markcord.js script and the style.css stylesheet in the head of your HTML:
@@ -44,3 +44,24 @@ If you just want Markcord to clean your content, you can use the `markcord.clean
 markcord.clean("<script>alert('Unsafe input!')</script>") // => "&lt;script&gt;alert('Unsafe input!')&lt;/script&gt;"
 ```
 
+## Configuring the library
+### Styling elements yourself
+Markcord adds a special class to each element to make it easier to style them.
+
+Class names markcord uses:
+- `markcord-header`
+- `markcord-ul`
+- `markcord-li`
+- `markcord-quote`
+- `markcord-underline`
+- `markcord-strikethrough`
+- `markcord-bold`
+- `markcord-italic`
+- `markcord-emoji`
+- `markcord-big` (used for big emojis alongside `markcord-emoji`)
+- `markcord-url`
+- `markcord-masked` (used for masked URLs alongside `markcord-url`)
+- `markcord-spoiler`
+- `markcord-revealed` (used for revealed spoilers alongside `markcord-spoiler`)
+
+The default stylesheet can be found [here](https://github.com/cordcutters/markcord/blob/main/style.css)
