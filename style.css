@@ -1,0 +1,59 @@
+:has(.markcord-emoji:nth-of-type(33)) > .markcord-emoji {
+    height: 1.375em !important;
+    width: 1.375em !important;
+}
+
+.markcord-emoji {
+    vertical-align: middle;
+    display: inline-block;
+    height: 1.375em;
+    width: 1.375em;
+}
+
+.markcord-emoji.markcord-big {
+    height: 3rem;
+    width: 3rem;
+}
+
+.markcord-url {
+    text-decoration: none;
+}
+
+.markcord-spoiler {
+    cursor: pointer;
+    color: transparent;
+    background-color: black;
+}
+
+.markcord-spoiler.markcord-revealed {
+    color: white;
+    cursor: text;
+    background-color: darkgray;
+}
+
+.markcord-quote {
+    margin-left: 0;
+}
+  
+.markcord-quote:before {
+    content: "|";
+    background-color: black;
+    opacity: .6;
+    margin-right: 4px;
+}
+
+.markcord-ul {
+    padding-left: 25px;
+    margin: 0;
+}
+
+.markcord-header {
+    display: inline;
+    padding: 0;
+    margin: 0;
+}
+
+/*.markcord-li::before, .markcord-li {
+    margin: 0;
+    display: inline;
+}*/
