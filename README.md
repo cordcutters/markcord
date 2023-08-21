@@ -24,6 +24,8 @@ Most modern browsers should be able to support this parser, though it requires l
 The default css file also uses the `:has` pseudoselector for determining if there are too much discord emojis ([see browser support here](https://caniuse.com/css-has))
 
 # Using the parser
+If you want to play around with the library, you can do it with [Markcord Playground](https://cordcutters.github.io/markcord/), it will dynamically parse your markdown on input and shows you the source and how it looks like
+
 To start out, include the markcord.js script and the style.css stylesheet in the head of your HTML:
 ```html
 <script src="https://cordcutters.github.io/markcord/markcord.js">
