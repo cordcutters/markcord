@@ -16,7 +16,11 @@
 }
 
 .markcord-url {
-    text-decoration: none;
+  color: rgb(0, 168, 252);
+}
+
+.markcord-url:not(hover) {
+  text-decoration: none;
 }
 
 .markcord-spoiler {
