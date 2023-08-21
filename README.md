@@ -116,6 +116,7 @@ The `markcord.rulesets` array contains any amount of arrays which contain arrays
 
 All of the regex rules used can be found in `markcord.regexRules`.
 
+Markcord will go through all the rulesets and the rules one by one and execute the regex until there are no more matches.
 ### Miscellaneous options
 - `markcord.cdn`: The CDN to load discord emojis from, defaults to `https://cdn.discordapp.com`
 - `markcord.headerOffset`: Offset for header numbers, defaults to `1` (the bigger this value, the smaller the headers)
