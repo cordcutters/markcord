@@ -24,7 +24,7 @@ const markcord = {
             const h = p1.length + markcord.headerOffset
             return `<h${h} class="markcord-header">
 ${p2}
-</h${h}>`
+<br></h${h}>`
         }],
         unorderedList: [/^(?<!(<ul class="markcord-ul"><li class="markcord-li">\s){8,})(-|\*) (.+)$/gm, (_, __, ___, p3) => {
             return `<ul class="markcord-ul"><li class="markcord-li">
@@ -111,6 +111,9 @@ ${p1}
         }],
         declutterUnorderedLists: [/<\/ul>\s?<ul class="markcord-ul">/g, () => { // declutter if two list items in a row
             return ""
+        }],
+        newLineTransformer: [/(?<!>)\n(?!<)/g, () => {
+            return "<br>"
         }]
     },
     rulesets: [],
@@ -148,9 +151,10 @@ markcord.secondRun = [
     markcord.regexRules.header,
     markcord.regexRules.unorderedList,
     markcord.regexRules.quote
-],
+]
 markcord.cleanupRun = [
     markcord.regexRules.deescape,
-    markcord.regexRules.declutterUnorderedLists
-],
+    markcord.regexRules.declutterUnorderedLists,
+    markcord.regexRules.newLineTransformer
+]
 markcord.rulesets = [markcord.firstRun, markcord.secondRun, markcord.cleanupRun]
