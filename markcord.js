@@ -86,7 +86,7 @@ ${p1}
                     if (!protocols.includes(url.protocol)) {
                         return match
                     }
-                    return `<a href="${p2}" class="markcord-url markcord-masked" onclick="markcord.interceptLink(this, event);">${p1}</a>`
+                    return `<a href="${p2}" class="markcord-url markcord-masked" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${p1}</a>`
                 } catch (e) {
                     return match
                 }
@@ -95,7 +95,7 @@ ${p1}
         URLs: [/(?<!<a href=")(?<!<img src=")(?<!this, event\);">)https?:\/\/[-a-zA-Z0-9@:%._\+~#=]+\/?/g, match => {
             try {
                 new URL(match)
-                return `<a href="${match}" class="markcord-url" onclick="markcord.interceptLink(this, event);">${match}</a>`
+                return `<a href="${match}" class="markcord-url" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${match}</a>`
             } catch (e) {
                 return match
             }
