@@ -26,12 +26,12 @@ const markcord = {
             return `<h${h} class="markcord-header">
 ${p2}</h${h}>`
         }],
-        unorderedList: [/^(?<!(<ul class="markcord-ul"><li class="markcord-li">\s){8,}) +?(-|\*) (.+)$/gm, (_, __, ___, p3) => {
+        unorderedList: [/^(?<!(<ul class="markcord-ul"><li class="markcord-li">\s){8,}) *?(-|\*) (.+)$/gm, (_, __, ___, p3) => {
             return `<ul class="markcord-ul"><li class="markcord-li">
 ${p3}
 </li></ul>`
         }],
-        quote: [/^(?<!markcord-quote">\s) +?&gt; (.+)$/gm, (_, p1) => {
+        quote: [/^(?<!markcord-quote">\s) *?&gt; (.+)$/gm, (_, p1) => {
             return `<blockquote class="markcord-quote">
 ${p1}
 </blockquote>`
@@ -117,7 +117,7 @@ ${p1}
     },
     rulesets: [],
     parse: function (text) {
-        let cleaned = this.clean(text)
+        let cleaned = this.clean(text).trim()
         window.__markcord_other_text = cleaned.replaceAll(this.regexRules.emoji[0], "").trim() !== ""
         this.rulesets.forEach(ruleset => {
             ruleset.forEach(rule => {
