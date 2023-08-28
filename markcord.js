@@ -69,7 +69,7 @@ ${p1}
         emoji: [/&lt;a?:([a-zA-Z0-9_]{2,32}):([0-9]{17,})&gt;/g, (match, p1, p2) => {
             return `<img src="${markcord.cdn}/emojis/${p2}.${(match.slice(0, 5) == "&lt;a") ? "gif" : "webp"}?size=44&quality=lossless" class="${(window.__markcord_other_text ? "" : "markcord-big ") + "markcord-emoji"}" name="${p1}" onerror="markcord.emoteError(this);"> `
         }],
-        maskedURLs: [/\[(.+)\]\((https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?&]+)\)/g, (match, p1, p2, offset, string, options) => {
+        maskedURLs: [/\[(.+)\]\((https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?(&amp;)]+)\)/g, (match, p1, p2, offset, string, options) => {
             if (string[offset - 1] == "\\" && string[offset - 2] != "\\") {
                 return match
             }
@@ -81,6 +81,7 @@ ${p1}
                 throw new Error
             } catch (e) {
                 try {
+                    p2 = p2.replaceAll("&amp;", "&")
                     const url = new URL(p2)
                     if (!markcord.allowedProtocols.includes(url.protocol)) {
                         return match
@@ -91,16 +92,17 @@ ${p1}
                 }
             }
         }],
-        noEmbedMaskedURLs: [/\[(.+)\]\((https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?&]+)\)/g, (match, p1, p2, offset, string) => markcord.regexRules.maskedURLs[1](match, p1, p2, offset, string, {noembed: true})],
-        URLs: [/(?<!<a href=")(?<!<img src=")(?<!this, event\);">)https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?&]+/g, (match, options) => {
+        noEmbedMaskedURLs: [/\[(.+)\]\((https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?(&amp;)]+)\)/g, (match, p1, p2, offset, string) => markcord.regexRules.maskedURLs[1](match, p1, p2, offset, string, {noembed: true})],
+        URLs: [/(?<!<a href=")(?<!<img src=")(?<!this, event\);">)https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?(&amp;)]+/g, (match, options) => {
             try {
+                match = match.replaceAll("&amp;", "&")
                 new URL(match)
                 return `<a href="${match}" class="markcord-url${options.noembed ? " markcord-noembed" : ""}" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${match}</a>`.replaceAll(...markcord.regexRules.escapeCharacters)
             } catch (e) {
                 return match
             }
         }],
-        noEmbedURLs: [/(?<!<a href=")(?<!<img src=")(?<!this, event\);">)&lt;(https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?&]+)&gt;/g, (_, p1) => markcord.regexRules.URLs[1](p1, {noembed: true})],
+        noEmbedURLs: [/(?<!<a href=")(?<!<img src=")(?<!this, event\);">)&lt;(https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?(&amp;)]+)&gt;/g, (_, p1) => markcord.regexRules.URLs[1](p1, {noembed: true})],
         spoiler: [/\|\|(?!\|)[\s\S]+?\|\|/g, (match, offset, string) => {
             if (string[offset - 1] == "\\" && string[offset - 2] != "\\") {
                 return `||${match.slice(2, -2)}|\\|`
