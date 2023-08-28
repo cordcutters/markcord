@@ -2,6 +2,7 @@ const markcord = {
     cleaner: document.createElement("p"),
     cdn: "https://cdn.discordapp.com",
     headerOffset: 1,
+    allowedProtocols: ["https:", "http:"],
     clean: function (text) {
         this.cleaner.textContent = text;
         const cleaned = this.cleaner.innerHTML;
@@ -69,34 +70,38 @@ ${p1}
         emoji: [/&lt;a?:([a-zA-Z0-9_]{2,32}):([0-9]{17,})&gt;/g, (match, p1, p2) => {
             return `<img src="${markcord.cdn}/emojis/${p2}.${(match.slice(0, 5) == "&lt;a") ? "gif" : "webp"}?size=44&quality=lossless" class="${(window.__markcord_other_text ? "" : "markcord-big ") + "markcord-emoji"}" name="${p1}" onerror="markcord.emoteError(this);"> `
         }],
-        maskedURLs: [/\[(.+)\]\((https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?]+)\)/g, (match, p1, p2, offset, string) => {
-            const protocols = ["https:", "http:"];
+        maskedURLs: [/\[(.+)\]\(((&lt;)?https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?]+(&gt;)?)\)/g, (match, p1, p2, p3, p4, offset, string) => {
             if (string[offset - 1] == "\\" && string[offset - 2] != "\\") {
                 return match
             }
+            p2 = p3 === "&lt;" ? p2.slice(4) : p2
+            p2 = p4 === "&gt;" ? p2.slice(0, -4) : p2
             try {
                 const url = new URL(p1)
-                if (protocols.includes(url.protocol)) {
+                if (markcord.allowedProtocols.includes(url.protocol)) {
                     return match
                 }
                 throw new Error
             } catch (e) {
                 try {
                     const url = new URL(p2)
-                    if (!protocols.includes(url.protocol)) {
+                    if (!markcord.allowedProtocols.includes(url.protocol)) {
                         return match
                     }
-                    return `<a href="${p2}" class="markcord-url markcord-masked" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${p1}</a>`.replaceAll(...markcord.regexRules.escapeCharacters)
+                    return `<a href="${p2}" class="markcord-url markcord-masked${p3 === "&lt;" && p4 === "&gt;" ? " markcord-noembed" : ""}" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${p1}</a>`.replaceAll(...markcord.regexRules.escapeCharacters)
                 } catch (e) {
                     return match
                 }
             }
         }],
-        URLs: [/(?<!<a href=")(?<!<img src=")(?<!this, event\);">)https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?]+\/?/g, match => {
+        URLs: [/(?<!<a href=")(?<!<img src=")(?<!this, event\);">)(&lt;)?https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?]+(&gt;)?/g, (match, p1, p2) => {
             try {
+                match = p1 === "&lt;" ? match.slice(4) : match
+                match = p2 === "&gt;" ? match.slice(0, -4) : match
                 new URL(match)
-                return `<a href="${match}" class="markcord-url" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${match}</a>`.replaceAll(...markcord.regexRules.escapeCharacters)
+                return `<a href="${match}" class="markcord-url${p1 === "&lt;" && p2 === "&gt;" ? " markcord-noembed" : ""}" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${match}</a>`.replaceAll(...markcord.regexRules.escapeCharacters)
             } catch (e) {
+                console.log(e)
                 return match
             }
         }],
@@ -153,3 +158,4 @@ markcord.cleanupRun = [
     markcord.regexRules.newLineTransformer
 ]
 markcord.rulesets = [markcord.firstRun, markcord.secondRun, markcord.cleanupRun]
+
