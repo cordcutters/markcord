@@ -86,7 +86,7 @@ ${p1}
                     if (!protocols.includes(url.protocol)) {
                         return match
                     }
-                    return `<a href="${p2}" class="markcord-url markcord-masked" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${p1}</a>`
+                    return `<a href="${p2}" class="markcord-url markcord-masked" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${p1}</a>`.replaceAll(...markcord.regexRules.escapeCharacters)
                 } catch (e) {
                     return match
                 }
@@ -95,7 +95,7 @@ ${p1}
         URLs: [/(?<!<a href=")(?<!<img src=")(?<!this, event\);">)https?:\/\/[-a-zA-Z0-9@:%._\+~#=/]+\/?/g, match => {
             try {
                 new URL(match)
-                return `<a href="${match}" class="markcord-url" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${match}</a>`
+                return `<a href="${match}" class="markcord-url" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${match}</a>`.replaceAll(...markcord.regexRules.escapeCharacters)
             } catch (e) {
                 return match
             }
@@ -106,15 +106,10 @@ ${p1}
             }
             return `<span class="markcord-spoiler" onclick="markcord.revealSpoiler(this);">${match.slice(2, -2)}</span>`
         }],
-        deescape: [/\\(?<!\\\\)[\*~_\\\/\|#]/g, match => {
-            return match.slice(1)
-        }],
-        declutterUnorderedLists: [/<\/ul>\s?<ul class="markcord-ul">/g, () => { // declutter if two list items in a row
-            return ""
-        }],
-        newLineTransformer: [/(?<!>)\n(?!<)/g, () => {
-            return "<br>"
-        }]
+        deescape: [/\\(?<!\\\\)[\*~_\\\/\|#]/g, match => match.slice(1)],
+        declutterUnorderedLists: [/<\/ul>\s?<ul class="markcord-ul">/g, ""],
+        newLineTransformer: [/(?<!>)\n(?!<)/g, "<br>"],
+        escapeCharacters: [/[\*_|~]/g, match => "\\" + match]
     },
     rulesets: [],
     parse: function (text) {
@@ -134,6 +129,8 @@ ${p1}
     }
 }
 markcord.firstRun = [
+    markcord.regexRules.maskedURLs,
+    markcord.regexRules.URLs, 
     markcord.regexRules.header,
     markcord.regexRules.unorderedList,
     markcord.regexRules.quote,
@@ -143,8 +140,6 @@ markcord.firstRun = [
     markcord.regexRules.italic,
     markcord.regexRules.italic2,
     markcord.regexRules.emoji,
-    markcord.regexRules.maskedURLs,
-    markcord.regexRules.URLs, 
     markcord.regexRules.spoiler
 ]
 markcord.secondRun = [
