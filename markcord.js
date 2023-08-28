@@ -69,7 +69,7 @@ ${p1}
         emoji: [/&lt;a?:([a-zA-Z0-9_]{2,32}):([0-9]{17,})&gt;/g, (match, p1, p2) => {
             return `<img src="${markcord.cdn}/emojis/${p2}.${(match.slice(0, 2) == "<a") ? "gif" : "webp"}?size=44&quality=lossless" class="${(window.__markcord_other_text ? "" : "markcord-big ") + "markcord-emoji"}" name="${p1}" onerror="markcord.emoteError(this);"> `
         }],
-        maskedURLs: [/\[(.+)\]\((https?:\/\/[-a-zA-Z0-9@:%._\+~#=/]+)\)/g, (match, p1, p2, offset, string) => {
+        maskedURLs: [/\[(.+)\]\((https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?]+)\)/g, (match, p1, p2, offset, string) => {
             const protocols = ["https:", "http:"];
             if (string[offset - 1] == "\\" && string[offset - 2] != "\\") {
                 return match
@@ -92,7 +92,7 @@ ${p1}
                 }
             }
         }],
-        URLs: [/(?<!<a href=")(?<!<img src=")(?<!this, event\);">)https?:\/\/[-a-zA-Z0-9@:%._\+~#=/]+\/?/g, match => {
+        URLs: [/(?<!<a href=")(?<!<img src=")(?<!this, event\);">)https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?]+\/?/g, match => {
             try {
                 new URL(match)
                 return `<a href="${match}" class="markcord-url" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${match}</a>`.replaceAll(...markcord.regexRules.escapeCharacters)
