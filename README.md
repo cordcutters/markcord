@@ -63,6 +63,7 @@ Class names markcord uses:
 - `markcord-big` (used for big emojis alongside `markcord-emoji`)
 - `markcord-url`
 - `markcord-masked` (used for masked URLs alongside `markcord-url`)
+- `markcord-noembed` (used for URLs/masked URLs that have embeds disabled alongside `markcord-url`)
 - `markcord-spoiler`
 - `markcord-revealed` (used for revealed spoilers alongside `markcord-spoiler`)
 
@@ -121,3 +122,4 @@ Markcord will go through all the rulesets and the rules one by one and execute t
 - `markcord.cdn`: The CDN to load discord emojis from, defaults to `https://cdn.discordapp.com`
 - `markcord.headerOffset`: Offset for header numbers, defaults to `1` (the bigger this value, the smaller the headers)
 - `markcord.cleaner`: The HTML element used for cleaning text. You should not change this value unless you know what you are doing.
+- `markcord.allowedProtocols`: Allowed protocols for URLs and masked URLs, defaults to `["https:", "http:"]`
