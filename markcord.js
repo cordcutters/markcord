@@ -92,7 +92,7 @@ ${p1}
                 }
             }
         }],
-        noEmbedMaskedURLs: [/\[(.+)\]\((https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?(&amp;)]+)\)/g, (match, p1, p2, offset, string) => markcord.regexRules.maskedURLs[1](match, p1, p2, offset, string, {noembed: true})],
+        noEmbedMaskedURLs: [/\[(.+)\]\(&lt;(https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?(&amp;)]+)&gt;\)/g, (match, p1, p2, offset, string) => markcord.regexRules.maskedURLs[1](match, p1, p2, offset, string, {noembed: true})],
         URLs: [/(?<!<a href=")(?<!<img src=")(?<!this, event\);">)https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?(&amp;)]+/g, (match, options) => {
             try {
                 match = match.replaceAll("&amp;", "&")
