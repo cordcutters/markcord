@@ -114,7 +114,7 @@ ${p1}
         declutterUnorderedLists: [/<\/ul>\s?<ul class="markcord-ul">/g, ""],
         newLineTransformer: [/(?<!<)\n(?!>)/g, "<br>"],
         escapeCharacters: [/[\*_|~]/g, match => "\\" + match],
-        noListItemNewline: [/<li class="markcord-li"><br>/g, '<li class="markcord-li">']
+        noExtraNewline: [/(<li class="markcord-li">| class="markcord-header">)<br>/g, (_, p1) => p1]
     },
     rulesets: [],
     parse: function (text) {
@@ -155,7 +155,6 @@ markcord.cleanupRun = [
     markcord.regexRules.deescape,
     markcord.regexRules.declutterUnorderedLists,
     markcord.regexRules.newLineTransformer,
-    markcord.regexRules.noListItemNewline
+    markcord.regexRules.noExtraNewline
 ]
 markcord.rulesets = [markcord.firstRun, markcord.secondRun, markcord.cleanupRun]
-
