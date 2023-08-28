@@ -23,7 +23,7 @@ const markcord = {
     regexRules: {
         header: [/^(?<!markcord-header">\s)(#{1,3}) (.+)$/gm, (_, p1, p2) => {
             const h = p1.length + markcord.headerOffset
-            return `<h${h} class="markcord-header">
+            return `<br><h${h} class="markcord-header">
 ${p2}
 <br></h${h}>`
         }],
@@ -158,4 +158,3 @@ markcord.cleanupRun = [
     markcord.regexRules.newLineTransformer
 ]
 markcord.rulesets = [markcord.firstRun, markcord.secondRun, markcord.cleanupRun]
-
