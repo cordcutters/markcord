@@ -114,7 +114,7 @@ ${p1}
         declutterUnorderedLists: [/<\/ul>\s?<ul class="markcord-ul">/g, ""],
         newLineTransformer: [/(?<!<)\n(?!>)/g, "<br>"],
         escapeCharacters: [/[\*_|~]/g, match => "\\" + match],
-        noExtraNewline: [/(<li class="markcord-li">| class="markcord-header">)<br>/g, (_, p1) => p1]
+        noExtraNewline: [/(<li class="markcord-li">| class="markcord-header">|<blockquote class="markcord-quote">)<br>/g, (_, p1) => p1]
     },
     rulesets: [],
     parse: function (text) {
