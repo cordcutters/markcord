@@ -67,7 +67,7 @@ ${p1}
             return `<em class="markcord-italic">${match.slice(1, -1)}</em>`
         }],
         emoji: [/&lt;a?:([a-zA-Z0-9_]{2,32}):([0-9]{17,})&gt;/g, (match, p1, p2) => {
-            return `<img src="${markcord.cdn}/emojis/${p2}.${(match.slice(0, 2) == "<a") ? "gif" : "webp"}?size=44&quality=lossless" class="${(window.__markcord_other_text ? "" : "markcord-big ") + "markcord-emoji"}" name="${p1}" onerror="markcord.emoteError(this);"> `
+            return `<img src="${markcord.cdn}/emojis/${p2}.${(match.slice(0, 5) == "&lt;a") ? "gif" : "webp"}?size=44&quality=lossless" class="${(window.__markcord_other_text ? "" : "markcord-big ") + "markcord-emoji"}" name="${p1}" onerror="markcord.emoteError(this);"> `
         }],
         maskedURLs: [/\[(.+)\]\((https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?]+)\)/g, (match, p1, p2, offset, string) => {
             const protocols = ["https:", "http:"];
