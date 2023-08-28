@@ -23,9 +23,8 @@ const markcord = {
     regexRules: {
         header: [/^(?<!markcord-header">\s)(#{1,3}) (.+)$/gm, (_, p1, p2) => {
             const h = p1.length + markcord.headerOffset
-            return `<br><h${h} class="markcord-header">
-${p2}
-<br></h${h}>`
+            return `<h${h} class="markcord-header">
+${p2}</h${h}>`
         }],
         unorderedList: [/^(?<!(<ul class="markcord-ul"><li class="markcord-li">\s){8,})(-|\*) (.+)$/gm, (_, __, ___, p3) => {
             return `<ul class="markcord-ul"><li class="markcord-li">
@@ -113,8 +112,9 @@ ${p1}
         }],
         deescape: [/\\(?<!\\\\)[\*~_\\\/\|#]/g, match => match.slice(1)],
         declutterUnorderedLists: [/<\/ul>\s?<ul class="markcord-ul">/g, ""],
-        newLineTransformer: [/(?<!>)\n(?!<)/g, "<br>"],
-        escapeCharacters: [/[\*_|~]/g, match => "\\" + match]
+        newLineTransformer: [/(?<!<)\n(?!>)/g, "<br>"],
+        escapeCharacters: [/[\*_|~]/g, match => "\\" + match],
+        noListItemNewline: [/<li class="markcord-li"><br>/g, '<li class="markcord-li">']
     },
     rulesets: [],
     parse: function (text) {
@@ -129,7 +129,6 @@ ${p1}
                 }
             })
         })
-        cleaned = cleaned.trim()
         return cleaned
     }
 }
@@ -155,6 +154,8 @@ markcord.secondRun = [
 markcord.cleanupRun = [
     markcord.regexRules.deescape,
     markcord.regexRules.declutterUnorderedLists,
-    markcord.regexRules.newLineTransformer
+    markcord.regexRules.newLineTransformer,
+    markcord.regexRules.noListItemNewline
 ]
 markcord.rulesets = [markcord.firstRun, markcord.secondRun, markcord.cleanupRun]
+
