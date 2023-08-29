@@ -20,7 +20,10 @@ const markcord = {
             self.className += " markcord-revealed"
         }
     },
-    regexRulees: {
+    regexRulees: { // unported rules, will remove when v2 is complete
+        emoji: [/&lt;a?:([a-zA-Z0-9_]{2,32}):([0-9]{17,})&gt;/g, (match, p1, p2) => {
+            return `<img src="${markcord.cdn}/emojis/${p2}.${(match.slice(0, 5) == "&lt;a") ? "gif" : "webp"}?size=44&quality=lossless" class="${(window.__markcord_other_text ? "" : "markcord-big ") + "markcord-emoji"}" name="${p1}" onerror="markcord.emoteError(this);"> `
+        }],
         maskedURLs: [/\[(.+)\]\((https?:\/\/[-a-zA-Z0-9@:%._\+~#=/?(&amp;)]+)\)/g, (match, p1, p2, offset, string, options) => {
             if (string[offset - 1] == "\\" && string[offset - 2] != "\\") {
                 return match
@@ -58,8 +61,6 @@ const markcord = {
         deescape: [/\\(?<!\\\\)[\*~_\\\/\|#]/g, match => match.slice(1)],
         declutterUnorderedLists: [/<\/ul>\s?<ul class="markcord-ul">/g, ""],
         newLineTransformer: [/(?<!<)\n(?!>)/g, "<br>"],
-        escapeCharacters: [/[\*_|~]/g, match => "\\" + match],
-        noExtraNewline: [/(<li class="markcord-li">| class="markcord-header">|<blockquote class="markcord-quote">)<br>/g, (_, p1) => p1]
     },
     regexRules: {
         underline: [/__(?!_)([\s\S]+?(?<!\\))__/, result => {
@@ -75,7 +76,7 @@ const markcord = {
             if (result.input[result.index - 1] == "\\" && result.input[result.index - 2] != "\\") {
                 return [result[0], "escapedText", []]
             }
-            return [result[2], "pre", []]
+            return [result[2], "pre", [], result[1]]
         }],
         codeblock: [/```(?:([a-z0-9-]+?)\n+)?\n*([^]+?)```/, result => { // regex stolen (and modified) from ItzDerock/discord-markdown-parser :troll:
             if (result.input[result.index - 1] == "\\" && result.input[result.index - 2] != "\\") {
@@ -95,11 +96,11 @@ const markcord = {
             }
             return [result[1], "bold", []]
         }],
-        italic: [/(?:\*|_)(?!\*|_)([\s\S]+?)(?<!\\)\1/, result => {
+        italic: [/(\*|_)(?!\*|_)([\s\S]+?)(?<!\\)\1/, result => {
             if (result.input[result.index - 1] == "\\" && result.input[result.index - 2] != "\\") {
                 return [result[0], "escapedText", []]
             }
-            return [result[2], "italic", []]
+            return [result[2], "italic", [], result[1]]
         }],
         spoiler: [/\|\|(?!\|)([\s\S]+?)\|\|/, result => {
             if (result.input[result.index - 1] == "\\" && result.input[result.index - 2] != "\\") {
@@ -122,7 +123,18 @@ const markcord = {
         },
         unorderedList: node => node[2].filter(item => item === "unorderedList").length > 8 
                         ? `${node[3]} ${node[0]}` 
-                        : `<ul class="markcord-ul"><li class="markcord-li">${node[1]}</li></ul>`
+                        : `<ul class="markcord-ul"><li class="markcord-li">${node[1]}</li></ul>`,
+        quote: node => node[2].includes("quote") ? `&gt; ${node[0]}` : `<blockquote class="markcord-quote">${node[1]}</blockquote>`,
+        pre: node => node[2].includes("pre") ? `${node[3]}${node[0]}${node[3]}` : `<pre class="markcord-pre">${node[1]}</pre>`,
+        codeblock: node => node[2].includes("codeblock") 
+                           ? `\`\`\`${node[0]}\`\`\`` 
+                           : `<pre class="markcord-pre"><code class="markcord-code language-${node[3]}">${node[1]}</code></pre>`,
+        strikethrough: node => node[2].includes("strikethrough") ? `~~${node[0]}~~` : `<s class="markcord-strikethrough">${node[0]}</s>`,
+        bold: node => node[2].includes("bold") ? `**${node[0]}**` : `<strong class="markcord-bold">${node[0]}</strong>`,
+        italic: node => node[2].includes("italic") ? `${node[3]}${node[0]}${node[3]}` : `<em class="markcord-italic">${node[0]}</em>`,
+        spoiler: node => node[2].includes("spoiler") 
+                         ? `||${node[0]}||` 
+                         : `<span class="markcord-spoiler" onclick="markcord.revealSpoiler(this);">${node[0]}</span>`,
     },
     extendNode: node => {
         const rules = markcord.types[node[1]] || markcord.types.all
