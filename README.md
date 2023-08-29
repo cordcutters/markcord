@@ -1,6 +1,9 @@
 # markcord
 Simple, Discord-like regex markdown parser for the web, written in JavaScript
 
+# IMPORTANT
+Markcord v1 (currently main branch) will no longer receive updates. The parsing engine is being rewritten to make parsing more correct. 
+
 # Supported features
 - Headers (`#` at the start)
 - Quotes (`>` at the start)
