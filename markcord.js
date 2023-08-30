@@ -34,7 +34,7 @@ const markcord = {
         }],
         header: [/^(#{1,3}) (.+)$/, result => [result[2], "header", [], result[1].length]],
         unorderedList: [/^(-|\*) (.+)$/, result => [result[2], "unorderedList", [], result[1]]],
-        quote: [/^&gt; (.+)$/, result => [result[1], "blockquote", []]],
+        quote: [/^&gt; (.+)$/, result => [result[1], "quote", []]],
         pre: [/(`+)([\s\S]*?[^`])\1(?!`)/, result => { // regex stolen (and modified) from simple-markdown :troll:
             if (result.input[result.index - 1] == "\\" && result.input[result.index - 2] != "\\") {
                 return [result[0], "escapedText", []]
@@ -130,11 +130,11 @@ const markcord = {
         unorderedList: node => node[2].filter(item => item === "unorderedList").length > 8 
                         ? `${node[3]} ${node[0]}` 
                         : `<ul class="markcord-ul"><li class="markcord-li">${node[0]}</li></ul>`,
-        quote: node => node[2].includes("quote") ? `&gt; ${node[0]}` : `<blockquote class="markcord-quote">${node[1]}</blockquote>`,
-        pre: node => node[2].includes("pre") ? `${node[3]}${node[0]}${node[3]}` : `<pre class="markcord-pre">${node[1]}</pre>`,
+        quote: node => node[2].includes("quote") ? `&gt; ${node[0]}` : `<blockquote class="markcord-quote">${node[0]}</blockquote>`,
+        pre: node => node[2].includes("pre") ? `${node[3]}${node[0]}${node[3]}` : `<pre class="markcord-pre">${node[0]}</pre>`,
         codeblock: node => node[2].includes("codeblock") 
                            ? `\`\`\`${node[0]}\`\`\`` 
-                           : `<pre class="markcord-pre"><code class="markcord-code language-${node[3]}">${node[1]}</code></pre>`,
+                           : `<pre class="markcord-pre"><code class="markcord-code${node[3] ? " language-" + node[3] : ""}">${node[0]}</code></pre>`,
         strikethrough: node => node[2].includes("strikethrough") ? `~~${node[0]}~~` : `<s class="markcord-strikethrough">${node[0]}</s>`,
         bold: node => node[2].includes("bold") ? `**${node[0]}**` : `<strong class="markcord-bold">${node[0]}</strong>`,
         italic: node => node[2].includes("italic") ? `${node[3]}${node[0]}${node[3]}` : `<em class="markcord-italic">${node[0]}</em>`,
@@ -165,7 +165,9 @@ const markcord = {
                     string = string.slice(result.index + result[0].length)
                 }
             })
-            extendedNode[0].push([string, "text", [...node[2], node[1]]])
+            if (string.trim() != "") {
+                extendedNode[0].push([string, "text", [...node[2], node[1]]])
+            }
             if (!matched) {
                 extendedNode[0] = node[0]
             }
@@ -200,7 +202,6 @@ const markcord = {
         let cleaned = [this.clean(text).trim(), "text", []]
         window.__markcord_other_text = cleaned[0].replaceAll(/&lt;(a)?:([a-zA-Z0-9_]{2,32}):([0-9]{17,})&gt;/g, "").trim() !== "" // has to be a global regex
         cleaned = markcord.extendNode(cleaned)
-        console.log("cleaned", cleaned)
         return markcord.renderNode(cleaned)
     }
 }
@@ -209,8 +210,10 @@ markcord.types.all = [
     markcord.regexRules.unorderedList,
     markcord.regexRules.quote,
     markcord.regexRules.underline,
-    markcord.regexRules.strikethrough, 
+    markcord.regexRules.strikethrough,
+    markcord.regexRules.italic, 
     markcord.regexRules.bold,
-    markcord.regexRules.italic,
-    markcord.regexRules.spoiler
+    markcord.regexRules.spoiler,
+    markcord.regexRules.codeblock,
+    markcord.regexRules.pre,
 ]
