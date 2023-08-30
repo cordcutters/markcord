@@ -117,6 +117,7 @@ const markcord = {
     types: {},
     renderers: {
         text: node => node[0],
+        escapedText: node => node[0],
         underline: node => node[2].includes("underline") ? `__${node[0]}__` : `<u class="markcord-underline">${node[0]}</u>`,
         header: node => {
             if (node[2].includes("header")) {
@@ -128,7 +129,7 @@ const markcord = {
         },
         unorderedList: node => node[2].filter(item => item === "unorderedList").length > 8 
                         ? `${node[3]} ${node[0]}` 
-                        : `<ul class="markcord-ul"><li class="markcord-li">${node[1]}</li></ul>`,
+                        : `<ul class="markcord-ul"><li class="markcord-li">${node[0]}</li></ul>`,
         quote: node => node[2].includes("quote") ? `&gt; ${node[0]}` : `<blockquote class="markcord-quote">${node[1]}</blockquote>`,
         pre: node => node[2].includes("pre") ? `${node[3]}${node[0]}${node[3]}` : `<pre class="markcord-pre">${node[1]}</pre>`,
         codeblock: node => node[2].includes("codeblock") 
@@ -164,6 +165,7 @@ const markcord = {
                     string = string.slice(result.index + result[0].length)
                 }
             })
+            extendedNode[0].push([string, "text", [...node[2], node[1]]])
             if (!matched) {
                 extendedNode[0] = node[0]
             }
@@ -179,17 +181,26 @@ const markcord = {
         return extendedNode
     },
     renderNode: node => {
+        console.log("renderNode", node)
         if (typeof(node[0]) === "string") {
+            console.log("string", node[0], node[1])
             return markcord.renderers[node[1]](node)
         } else {
-            // IDK WHAT TO DO HERE
+            console.log("node", node[0], node[1])
+            node[0] = node[0].map(markcord.renderNode)
+            if (node[0].length === 1) {
+                node[0] = node[0][0]
+            } else if (node[0].filter(item => typeof(item) === "string").length === node[0].length) {
+                return node[0].join("")
+            }
+            return markcord.renderNode(node)
         }
     },
     parse: function (text) {
         let cleaned = [this.clean(text).trim(), "text", []]
         window.__markcord_other_text = cleaned[0].replaceAll(/&lt;(a)?:([a-zA-Z0-9_]{2,32}):([0-9]{17,})&gt;/g, "").trim() !== "" // has to be a global regex
         cleaned = markcord.extendNode(cleaned)
-        console.log(cleaned)
+        console.log("cleaned", cleaned)
         return markcord.renderNode(cleaned)
     }
 }
