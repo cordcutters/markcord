@@ -224,6 +224,10 @@ const markcord = {
     except: (what, inside) => inside.filter(item => item !== what)
 }
 markcord.types.generic = [
+    markcord.regexRules.noEmbedMaskedURLs,
+    markcord.regexRules.maskedURLs,
+    markcord.regexRules.noEmbedURLs,
+    markcord.regexRules.URLs,
     markcord.regexRules.underline,
     markcord.regexRules.strikethrough,
     markcord.regexRules.bolditalic,
@@ -232,11 +236,7 @@ markcord.types.generic = [
     markcord.regexRules.spoiler,
     markcord.regexRules.codeblock,
     markcord.regexRules.pre,
-    markcord.regexRules.emoji,
-    markcord.regexRules.noEmbedMaskedURLs,
-    markcord.regexRules.maskedURLs,
-    markcord.regexRules.noEmbedURLs,
-    markcord.regexRules.URLs
+    markcord.regexRules.emoji
 ]
 markcord.types.all = [
     markcord.regexRules.header,
