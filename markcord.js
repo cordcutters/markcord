@@ -20,19 +20,17 @@ const markcord = {
             self.className += " markcord-revealed"
         }
     },
-    regexRulees: { // unported rules, will remove when v2 is complete
+    regexRules: {
         deescape: [/\\(?<!\\\\)[\*~_\\\/\|#]/g, match => match.slice(1)],
         declutterUnorderedLists: [/<\/ul>\s?<ul class="markcord-ul">/g, ""],
         newLineTransformer: [/(?<!<)\n(?!>)/g, "<br>"],
-    },
-    regexRules: {
         underline: [/__(?!_)([\s\S]+?(?<!\\))__/, result => {
             if (result.input[result.index - 1] == "\\" && result.input[result.index - 2] != "\\") {
                 return [result[0], "escapedText", []]
             }
             return [result[1], "underline", []]
         }],
-        header: [/^(#{1,3}) (.+)$/, result => [result[2], "header", [], result[1].length]],
+        header: [/^(#{1,3}) (.+)$/m, result => [result[2], "header", [], result[1].length]],
         unorderedList: [/^(-|\*) (.+)$/, result => [result[2], "unorderedList", [], result[1]]],
         quote: [/^&gt; (.+)$/, result => [result[1], "quote", []]],
         pre: [/(`+)([\s\S]*?[^`])\1(?!`)/, result => { // regex stolen (and modified) from simple-markdown :troll:
@@ -65,6 +63,12 @@ const markcord = {
             }
             return [result[2], "italic", [], result[1]]
         }],
+        bolditalic: [/(?:(\*|_)\*\*(?!\*)([\s\S]+?)(?<!\\)\*\*\1)|(?:\*\*(\*|_)(?!\*)([\s\S]+?)(?<!\\)\3\*\*)/, result => { // cursed but im too lazy to fix the core issue
+            if (result.input[result.index - 1] == "\\" && result.input[result.index - 2] != "\\") {
+                return [result[0], "escapedText", []]
+            }
+            return [result[2] ? result[2] : result[4], "bolditalic", [], result[1] ? result[1] : result[2], result[0].slice(2, 3)]
+        }],
         spoiler: [/\|\|(?!\|)([\s\S]+?)\|\|/, result => {
             if (result.input[result.index - 1] == "\\" && result.input[result.index - 2] != "\\") {
                 return [result[0], "escapedText", []]
@@ -75,7 +79,7 @@ const markcord = {
             if (result.input[result.index - 1] == "\\" && result.input[result.index - 2] != "\\") {
                 return [result[0], "escapedText", []]
             }
-            return [result[1], "spoiler", [], result[2], result[3]]
+            return [result[2], "emoji", [], result[1], result[3]]
         }],
         URLs: [/https?:\/\/(?:[-a-zA-Z0-9@:%._\+~#=/?]|&amp;)+/, (result, noembed) => {
             let content = noembed ? result[1] : result[0]
@@ -114,7 +118,13 @@ const markcord = {
         }],
         noEmbedMaskedURLs: [/\[(.+)\]\(&lt;(https?:\/\/(?:[-a-zA-Z0-9@:%._\+~#=/?]|&amp;)+)&gt;\)/, result => markcord.regexRules.maskedURLs(result, true)]
     },  
-    types: {},
+    types: {
+        url: [],
+        maskedurl: [],
+        emoji: [],
+        escapedText: []
+    },
+    postprocessingRules: [],
     renderers: {
         text: node => node[0],
         escapedText: node => node[0],
@@ -138,15 +148,19 @@ const markcord = {
         strikethrough: node => node[2].includes("strikethrough") ? `~~${node[0]}~~` : `<s class="markcord-strikethrough">${node[0]}</s>`,
         bold: node => node[2].includes("bold") ? `**${node[0]}**` : `<strong class="markcord-bold">${node[0]}</strong>`,
         italic: node => node[2].includes("italic") ? `${node[3]}${node[0]}${node[3]}` : `<em class="markcord-italic">${node[0]}</em>`,
+        bolditalic: node => node[2].includes("bolditalic") 
+                    ? `${node[3]}*${node[4]}${node[0]}${node[3]}*${node[4]}` 
+                    : `<strong class="markcord-bold"><em class="markcord-italic">${node[0]}</em></strong>`,
         spoiler: node => node[2].includes("spoiler") 
                          ? `||${node[0]}||` 
                          : `<span class="markcord-spoiler" onclick="markcord.revealSpoiler(this);">${node[0]}</span>`,
-        emoji: node => `<img src="${markcord.cdn}/emojis/${node[4]}.${(node[0] === "a") ? "gif" : "webp"}?size=44&quality=lossless" class="${(window.__markcord_other_text ? "" : "markcord-big ") + "markcord-emoji"}" name="${result[3]}" onerror="markcord.emoteError(this);">`,
-        url: node => `<a href="${node[0]}" class="markcord-url${node[3] ? " markcord-noembed" : ""} target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${node[0]}</a>`,
-        maskedurl: node => `<a href="${node[3]}" class="markcord-url markcord-masked${node[4] ? " markcord-noembed" : ""}" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${node[1]}</a>`
+        emoji: node => `<img src="${markcord.cdn}/emojis/${node[4]}.${(node[3] === "a") ? "gif" : "webp"}?size=44&quality=lossless" class="${(window.__markcord_other_text ? "" : "markcord-big ") + "markcord-emoji"}" name="${node[0]}" onerror="markcord.emoteError(this);">`,
+        url: node => `<a href="${node[0]}" class="markcord-url${node[3] ? " markcord-noembed" : ""}" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${node[0]}</a>`,
+        maskedurl: node => `<a href="${node[3]}" class="markcord-url markcord-masked${node[4] ? " markcord-noembed" : ""}" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${node[0]}</a>`
     },
     extendNode: node => {
-        const rules = markcord.types[node[1]] || markcord.types.all
+        console.log("extendNode", node)
+        const rules = markcord.types[node[1]] || markcord.types.generic
         const extendedNode = [...node]
         extendedNode[0] = []
         let string = node[0]
@@ -197,23 +211,66 @@ const markcord = {
             }
             return markcord.renderNode(node)
         }
-    },
+    },  
     parse: function (text) {
         let cleaned = [this.clean(text).trim(), "text", []]
         window.__markcord_other_text = cleaned[0].replaceAll(/&lt;(a)?:([a-zA-Z0-9_]{2,32}):([0-9]{17,})&gt;/g, "").trim() !== "" // has to be a global regex
-        cleaned = markcord.extendNode(cleaned)
-        return markcord.renderNode(cleaned)
-    }
+        cleaned = markcord.renderNode(markcord.extendNode(cleaned))
+        this.postprocessingRules.forEach(rule => {
+            let previous;
+            while (previous !== cleaned) {
+                previous = cleaned
+                cleaned = cleaned.replaceAll(...rule)
+            }
+        })
+        return cleaned
+    },
+    except: (what, inside) => inside.filter(item => item !== what)
 }
+markcord.types.generic = [
+    markcord.regexRules.underline,
+    markcord.regexRules.strikethrough,
+    markcord.regexRules.bolditalic,
+    markcord.regexRules.bold,   
+    markcord.regexRules.italic, 
+    markcord.regexRules.spoiler,
+    markcord.regexRules.codeblock,
+    markcord.regexRules.pre,
+    markcord.regexRules.emoji,
+    markcord.regexRules.noEmbedMaskedURLs,
+    markcord.regexRules.maskedURLs,
+    markcord.regexRules.noEmbedURLs,
+    markcord.regexRules.URLs
+]
 markcord.types.all = [
     markcord.regexRules.header,
     markcord.regexRules.unorderedList,
     markcord.regexRules.quote,
-    markcord.regexRules.underline,
-    markcord.regexRules.strikethrough,
-    markcord.regexRules.italic, 
-    markcord.regexRules.bold,
-    markcord.regexRules.spoiler,
-    markcord.regexRules.codeblock,
-    markcord.regexRules.pre,
+    ...markcord.types.generic
+]
+markcord.types.spoiler = markcord.except(markcord.regexRules.spoiler, markcord.types.all)
+markcord.types.italic = markcord.except(markcord.regexRules.italic, markcord.types.all)
+markcord.types.bold = markcord.except(markcord.regexRules.bold, markcord.types.all)
+markcord.types.bolditalic = markcord.except(markcord.regexRules.bolditalic, markcord.types.all)
+markcord.types.strikethrough = markcord.except(markcord.regexRules.strikethrough, markcord.types.all)
+markcord.types.underline = markcord.except(markcord.regexRules.underline, markcord.types.all)
+markcord.types.header = [
+    markcord.regexRules.unorderedList,
+    markcord.regexRules.quote,
+    ...markcord.types.generic
+]
+markcord.types.unorderedList = [
+    markcord.regexRules.unorderedList,
+    markcord.regexRules.quote,
+    ...markcord.types.generic
+]
+markcord.types.quote = [
+    markcord.types.header,
+    markcord.regexRules.unorderedList,
+    ...markcord.types.generic
+]
+markcord.postprocessingRules = [
+    markcord.regexRules.deescape,
+    markcord.regexRules.declutterUnorderedLists,
+    markcord.regexRules.newLineTransformer
 ]
