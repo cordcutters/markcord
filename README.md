@@ -1,9 +1,6 @@
 # markcord
 Simple, Discord-like regex markdown parser for the web, written in JavaScript
 
-# IMPORTANT
-This version is not working yet! If you want a working library, look at the v1 branch.
-
 # Supported features
 - Headers (`#` at the start)
 - Quotes (`>` at the start)
@@ -16,6 +13,7 @@ This version is not working yet! If you want a working library, look at the v1 b
 - URLs (`https://any_valid_url` or `http://any_valid_url`)
 - Spoilers (`||` at both sides)
 - Codeblocks (\` or \`\`\` at both sides)
+- Codeblocks have highlight.js support
 
 # Planning to add (maybe)
 - Ordered lists
