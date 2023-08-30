@@ -15,11 +15,11 @@ This version is not working yet! If you want a working library, look at the v1 b
 - Masked URLs (`[mask](url)`)
 - URLs (`https://any_valid_url` or `http://any_valid_url`)
 - Spoilers (`||` at both sides)
+- Codeblocks (\` or \`\`\` at both sides)
 
 # Planning to add (maybe)
 - Ordered lists
 - Channel/User/Role/Slash Command mentions (`<#channel_id>`, `<@user_id>`, `<@&role_id>`, `</name:command_id>`)
-- Codeblocks (\` or \`\`\` at both sides)
 
 # Browser support
 Most modern browsers should be able to support this parser, though it requires lookbehind assertions ([see browser support here](https://caniuse.com/js-regexp-lookbehind))
@@ -69,8 +69,10 @@ Class names markcord uses:
 - `markcord-noembed` (used for URLs/masked URLs that have embeds disabled alongside `markcord-url`)
 - `markcord-spoiler`
 - `markcord-revealed` (used for revealed spoilers alongside `markcord-spoiler`)
+- `markcord-pre`
+- `markcord-code`
 
-The default stylesheet can be found [here](https://github.com/cordcutters/markcord/blob/main/style.css)
+The default stylesheet can be found [here](https://github.com/cordcutters/markcord/blob/v2/style.css)
 ### Overriding event behaviour
 By default, the library sets some events for elements such as emojis, spoiler or URLs to implement certain behaviours.
 
@@ -113,16 +115,7 @@ Using the parsed content without the stylesheet will likely render elements in a
 
 if you do not wish to include the Markcord stylesheet, you could include the code from it in your own stylesheet.
 
-### Changing regex rules
-If you wish to exclude / include some regex rules, you can change the `markcord.rulesets` array.
-
-The `markcord.rulesets` array contains any amount of arrays which contain arrays with two elements: the regular expression and the [callback](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_function_as_the_replacement).
-
-All of the regex rules used can be found in `markcord.regexRules`.
-
-Markcord will go through all the rulesets and the rules one by one and execute the regex until there are no more matches.
 ### Miscellaneous options
 - `markcord.cdn`: The CDN to load discord emojis from, defaults to `https://cdn.discordapp.com`
 - `markcord.headerOffset`: Offset for header numbers, defaults to `1` (the bigger this value, the smaller the headers)
 - `markcord.cleaner`: The HTML element used for cleaning text. You should not change this value unless you know what you are doing.
-- `markcord.allowedProtocols`: Allowed protocols for URLs and masked URLs, defaults to `["https:", "http:"]`
