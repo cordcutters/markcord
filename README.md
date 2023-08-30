@@ -1,5 +1,7 @@
 # markcord
 Simple, Discord-like regex markdown parser for the web, written in JavaScript
+# IMPORTANT
+currently pretty broken, you can find a working version in the v1 branch
 
 # Supported features
 - Headers (`#` at the start)
