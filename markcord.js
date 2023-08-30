@@ -159,7 +159,6 @@ const markcord = {
         maskedurl: node => `<a href="${node[3]}" class="markcord-url markcord-masked${node[4] ? " markcord-noembed" : ""}" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${node[0]}</a>`
     },
     extendNode: node => {
-        console.log("extendNode", node)
         const rules = markcord.types[node[1]] || markcord.types.generic
         const extendedNode = [...node]
         extendedNode[0] = []
@@ -197,12 +196,9 @@ const markcord = {
         return extendedNode
     },
     renderNode: node => {
-        console.log("renderNode", node)
         if (typeof(node[0]) === "string") {
-            console.log("string", node[0], node[1])
             return markcord.renderers[node[1]](node)
         } else {
-            console.log("node", node[0], node[1])
             node[0] = node[0].map(markcord.renderNode)
             if (node[0].length === 1) {
                 node[0] = node[0][0]
