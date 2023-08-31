@@ -23,7 +23,7 @@ const markcord = {
     regexRules: {
         deescape: [/\\(?<!\\\\)[\*~_\\\/\|#]/g, match => match.slice(1)],
         declutterUnorderedLists: [/<\/ul>\s?<ul class="markcord-ul">/g, ""],
-        newLineTransformer: [/(?<!<)\n(?!>)/g, "<br>"],
+        newLineTransformer: [/\n/g, "<br>"],
         underline: [/__(?!_)([\s\S]+?(?<!\\))__/, result => {
             if (result.input[result.index - 1] == "\\" && result.input[result.index - 2] != "\\") {
                 return [result[0], "escapedText", []]
@@ -126,7 +126,7 @@ const markcord = {
     },
     postprocessingRules: [],
     renderers: {
-        text: node => node[0],
+        text: node => node[0].replaceAll(...markcord.regexRules.newLineTransformer),
         escapedText: node => node[0],
         underline: node => node[2].includes("underline") ? `__${node[0]}__` : `<u class="markcord-underline">${node[0]}</u>`,
         header: node => {
@@ -141,10 +141,10 @@ const markcord = {
                         ? `${node[3]} ${node[0]}` 
                         : `<ul class="markcord-ul"><li class="markcord-li">${node[0]}</li></ul>`,
         quote: node => node[2].includes("quote") ? `&gt; ${node[0]}` : `<blockquote class="markcord-quote">${node[0]}</blockquote>`,
-        pre: node => node[2].includes("pre") ? `${node[3]}${node[0]}${node[3]}` : `<pre class="markcord-pre">${node[0]}</pre>`,
+        pre: node => node[2].includes("pre") ? `${node[3]}${node[0]}${node[3]}` : `<pre class="markcord-pre">${node[0].replaceAll("\n", "<<N>>")}</pre>`,
         codeblock: node => node[2].includes("codeblock") 
                            ? `\`\`\`${node[0]}\`\`\`` 
-                           : `<pre class="markcord-pre"><code class="markcord-code${node[3] ? " language-" + node[3] : ""}">${node[0]}</code></pre>`,
+                           : `<pre class="markcord-pre"><code class="markcord-code${node[3] ? " language-" + node[3] : ""}">${node[0].replaceAll("\n", "<<N>>")}</code></pre>`,
         strikethrough: node => node[2].includes("strikethrough") ? `~~${node[0]}~~` : `<s class="markcord-strikethrough">${node[0]}</s>`,
         bold: node => node[2].includes("bold") ? `**${node[0]}**` : `<strong class="markcord-bold">${node[0]}</strong>`,
         italic: node => node[2].includes("italic") ? `${node[3]}${node[0]}${node[3]}` : `<em class="markcord-italic">${node[0]}</em>`,
@@ -274,5 +274,5 @@ markcord.types.quote = [
 markcord.postprocessingRules = [
     markcord.regexRules.deescape,
     markcord.regexRules.declutterUnorderedLists,
-    markcord.regexRules.newLineTransformer
+    ["<<N>>", "\n"]
 ]
