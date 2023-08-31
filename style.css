@@ -55,3 +55,7 @@
     padding: 0;
     margin: 0;
 }
+
+.markcord-pre {
+    display: inline;
+}
