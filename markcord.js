@@ -116,7 +116,7 @@ const markcord = {
                 }
             }
         }, "maskedURLs"],
-        noEmbedMaskedURLs: [/\[(.+)\]\(&lt;(https?:\/\/(?:[-a-zA-Z0-9@:%._\+~#=/?]|&amp;)+)&gt;\)/, result => markcord.regexRules.maskedURLs(result, true), "noEmbedMaskedURLs"]
+        noEmbedMaskedURLs: [/\[(.+)\]\(&lt;(https?:\/\/(?:[-a-zA-Z0-9@:%._\+~#=/?]|&amp;)+)&gt;\)/, result => markcord.regexRules.maskedURLs[1](result, true), "noEmbedMaskedURLs"]
     },  
     types: {
         url: [],
