@@ -31,8 +31,8 @@ const markcord = {
             return [result[1], "underline", []]
         }],
         header: [/^(#{1,3}) (.+)$/m, result => [result[2], "header", [], result[1].length]],
-        unorderedList: [/^(-|\*) (.+)$/, result => [result[2], "unorderedList", [], result[1]]],
-        quote: [/^&gt; (.+)$/, result => [result[1], "quote", []]],
+        unorderedList: [/^ *?(-|\*) (.+)$/m, result => [result[2], "unorderedList", [], result[1]]],
+        quote: [/^&gt; (.+)$/m, result => [result[1], "quote", []]],
         pre: [/(`+)([\s\S]*?[^`])\1(?!`)/, result => { // regex stolen (and modified) from simple-markdown :troll:
             if (result.input[result.index - 1] == "\\" && result.input[result.index - 2] != "\\") {
                 return [result[0], "escapedText", []]
@@ -159,15 +159,21 @@ const markcord = {
         maskedurl: node => `<a href="${node[3]}" class="markcord-url markcord-masked${node[4] ? " markcord-noembed" : ""}" target="_blank" rel="noopener noreferrer" onclick="markcord.interceptLink(this, event);">${node[0]}</a>`
     },
     extendNode: node => {
-        const rules = markcord.types[node[1]] || markcord.types.generic
+        const rules = markcord.types[node[1]] || markcord.types.all
         const extendedNode = [...node]
         extendedNode[0] = []
         let string = node[0]
         if (typeof(node[0]) === "string") {
             let matched
             rules.forEach(rule => {
-                const result = rule[0].exec(string)
-                if (result) {
+                let result = []
+                let previous;
+                while (result !== previous && result) {
+                    previous = result   
+                    result = rule[0].exec(string)
+                    if (!result) {
+                        break
+                    }
                     matched = true
                     const newNode = rule[1](result)
                     newNode[2] = [...node[2], node[1]]
@@ -203,7 +209,7 @@ const markcord = {
             if (node[0].length === 1) {
                 node[0] = node[0][0]
             } else if (node[0].filter(item => typeof(item) === "string").length === node[0].length) {
-                return node[0].join("")
+                node[0] = node[0].join("") 
             }
             return markcord.renderNode(node)
         }
@@ -261,7 +267,7 @@ markcord.types.unorderedList = [
     ...markcord.types.generic
 ]
 markcord.types.quote = [
-    markcord.types.header,
+    markcord.regexRules.header,
     markcord.regexRules.unorderedList,
     ...markcord.types.generic
 ]
