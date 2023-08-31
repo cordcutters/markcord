@@ -38,13 +38,13 @@ const markcord = {
                 return [result[0], "escapedText", []]
             }
             return [result[2], "pre", [], result[1]]
-        }],
+        }, "pre"],
         codeblock: [/```(?:([a-z0-9-]+?)\n+)?\n*([^]+?)```/, result => { // regex stolen (and modified) from ItzDerock/discord-markdown-parser :troll:
             if (result.input[result.index - 1] == "\\" && result.input[result.index - 2] != "\\") {
                 return [result[0], "escapedText", []]
             }
             return [result[2], "codeblock", [], result[1]]
-        }],
+        }, "codeblock"],
         strikethrough: [/~~(?!~)([\s\S]+)(?<!\\)~~(?!_)/g, result => {
             if (result.input[result.index - 1] == "\\" && result.input[result.index - 2] != "\\") {
                 return [result[0], "escapedText", []]
@@ -90,8 +90,8 @@ const markcord = {
             } catch (e) {
                 return [content, "escapedText", []]
             }
-        }],
-        noEmbedURLs: [/&lt;(https?:\/\/(?:[-a-zA-Z0-9@:%._\+~#=/?]|&amp;)+)&gt;/, result => markcord.regexRules.URLs[1](result, true)],
+        }, "URLs"],
+        noEmbedURLs: [/&lt;(https?:\/\/(?:[-a-zA-Z0-9@:%._\+~#=/?]|&amp;)+)&gt;/, result => markcord.regexRules.URLs[1](result, true), "noEmbedURLs"],
         maskedURLs: [/\[(.+)\]\((https?:\/\/(?:[-a-zA-Z0-9@:%._\+~#=/?]|&amp;)+)\)/, (result, noembed) => {
             if (result.input[result.index - 1] == "\\" && result.input[result.index - 2] != "\\") {
                 return [result[0], "escapedText", []]
@@ -115,14 +115,16 @@ const markcord = {
                     return [result[0], "escapedText", []]
                 }
             }
-        }],
-        noEmbedMaskedURLs: [/\[(.+)\]\(&lt;(https?:\/\/(?:[-a-zA-Z0-9@:%._\+~#=/?]|&amp;)+)&gt;\)/, result => markcord.regexRules.maskedURLs(result, true)]
+        }, "maskedURLs"],
+        noEmbedMaskedURLs: [/\[(.+)\]\(&lt;(https?:\/\/(?:[-a-zA-Z0-9@:%._\+~#=/?]|&amp;)+)&gt;\)/, result => markcord.regexRules.maskedURLs(result, true), "noEmbedMaskedURLs"]
     },  
     types: {
         url: [],
         maskedurl: [],
         emoji: [],
-        escapedText: []
+        escapedText: [],
+        codeblock: [],
+        pre: []
     },
     postprocessingRules: [],
     renderers: {
@@ -164,31 +166,40 @@ const markcord = {
         extendedNode[0] = []
         let string = node[0]
         if (typeof(node[0]) === "string") {
-            let matched
-            rules.forEach(rule => {
-                let result = []
-                let previous;
-                while (result !== previous && result) {
-                    previous = result   
-                    result = rule[0].exec(string)
-                    if (!result) {
-                        break
-                    }
-                    matched = true
-                    const newNode = rule[1](result)
-                    newNode[2] = [...node[2], node[1]]
-                    if (result.index != 0) {
-                        extendedNode[0].push([string.slice(0, result.index), "text", [...node[2], node[1]]])
-                    }
-                    extendedNode[0].push(newNode)
-                    string = string.slice(result.index + result[0].length)
-                }
-            })
-            if (string.trim() != "") {
-                extendedNode[0].push([string, "text", [...node[2], node[1]]])
+            const originalString = string
+            const ruleOrder = [ ...rules ].map(rule => [rule[0].exec(string), rule]).filter(item => item[0] !== null)
+                                          .sort((a, b) => {
+            if (a[1][3] === "maskedURLs" && b[1][2] === "URLs" || a[1][2] === "noEmbedURLs" && b[1][2] === "URLs" || a[1][2] === "noEmbedMaskedURLs" && b[1][2] === "maskedURLs" || a[1][2] === "codeblock" && b[1][2] === "pre") {
+                return -1
+            } else if (a[1][2] === "URLs" && b[1][2] === "maskedURLs" || a[1][2] === "URLs" && b[1][2] === "noEmbedURLs" || a[1][2] === "maskedURLs" && b[1][2] === "noEmbedMaskedURLs" || a[1][2] === "pre" && b[1][2] === "codeblock") {
+                return 1
             }
-            if (!matched) {
+            return b[0][0].length - a[0][0].length
+            })
+            if (ruleOrder.length === 0) {
                 extendedNode[0] = node[0]
+            } else {
+                ruleOrder.forEach(ruleset => {
+                    let result = []
+                    let previous;
+                    while (result !== previous && result) {
+                        previous = result   
+                        result = string === originalString ? ruleset[0] : ruleset[1][0].exec(string)
+                        if (!result) {
+                            break
+                        }
+                        const newNode = ruleset[1][1](result)
+                        newNode[2] = [...node[2], node[1]]
+                        if (result.index != 0) {
+                            extendedNode[0].push([string.slice(0, result.index), "text", [...node[2], node[1]]])
+                        }
+                        extendedNode[0].push(newNode)
+                        string = string.slice(result.index + result[0].length)
+                    }
+                })
+                if (string.trim() != "") {
+                    extendedNode[0].push([string, "text", [...node[2], node[1]]])
+                }
             }
         } else {
             node[0].forEach(newNode => extendedNode[0].push(markcord.extendNode(newNode)))
@@ -211,13 +222,14 @@ const markcord = {
             } else if (node[0].filter(item => typeof(item) === "string").length === node[0].length) {
                 node[0] = node[0].join("") 
             }
-            return markcord.renderNode(node)
+            return markcord.renderNode(node)    
         }
-    },  
+    },
+    parseText: text => markcord.renderNode(markcord.extendNode([text, "text", []])),
     parse: function (text) {
-        let cleaned = [this.clean(text).trim(), "text", []]
-        window.__markcord_other_text = cleaned[0].replaceAll(/&lt;(a)?:([a-zA-Z0-9_]{2,32}):([0-9]{17,})&gt;/g, "").trim() !== "" // has to be a global regex
-        cleaned = markcord.renderNode(markcord.extendNode(cleaned))
+        let cleaned = this.clean(text).trim()
+        window.__markcord_other_text = cleaned.replaceAll(/&lt;(a)?:([a-zA-Z0-9_]{2,32}):([0-9]{17,})&gt;/g, "").trim() !== "" // has to be a global regex
+        cleaned = this.parseText(cleaned)
         this.postprocessingRules.forEach(rule => {
             let previous;
             while (previous !== cleaned) {
@@ -240,11 +252,11 @@ markcord.types.generic = [
     markcord.regexRules.bold,   
     markcord.regexRules.italic, 
     markcord.regexRules.spoiler,
-    markcord.regexRules.codeblock,
-    markcord.regexRules.pre,
     markcord.regexRules.emoji
 ]
 markcord.types.all = [
+    markcord.regexRules.codeblock,
+    markcord.regexRules.pre,
     markcord.regexRules.header,
     markcord.regexRules.unorderedList,
     markcord.regexRules.quote,
@@ -257,16 +269,22 @@ markcord.types.bolditalic = markcord.except(markcord.regexRules.bolditalic, mark
 markcord.types.strikethrough = markcord.except(markcord.regexRules.strikethrough, markcord.types.all)
 markcord.types.underline = markcord.except(markcord.regexRules.underline, markcord.types.all)
 markcord.types.header = [
+    markcord.regexRules.codeblock,
+    markcord.regexRules.pre,
     markcord.regexRules.unorderedList,
     markcord.regexRules.quote,
     ...markcord.types.generic
 ]
 markcord.types.unorderedList = [
+    markcord.regexRules.codeblock,
+    markcord.regexRules.pre,
     markcord.regexRules.unorderedList,
     markcord.regexRules.quote,
     ...markcord.types.generic
 ]
 markcord.types.quote = [
+    markcord.regexRules.codeblock,
+    markcord.regexRules.pre,
     markcord.regexRules.header,
     markcord.regexRules.unorderedList,
     ...markcord.types.generic
