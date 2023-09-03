@@ -225,11 +225,11 @@ const markcord = {
             return markcord.renderNode(node)    
         }
     },
-    parseText: text => markcord.renderNode(markcord.extendNode([text, "text", []])),
-    parse: function (text) {
+    parseText: (text, startingNodeType) => markcord.renderNode(markcord.extendNode([text, startingNodeType, []])),
+    parse: function (text, startingNodeType = "text") {
         let cleaned = this.clean(text).trim()
         window.__markcord_other_text = cleaned.replaceAll(/&lt;(a)?:([a-zA-Z0-9_]{2,32}):([0-9]{17,})&gt;/g, "").trim() !== "" // has to be a global regex
-        cleaned = this.parseText(cleaned)
+        cleaned = this.parseText(cleaned, startingNodeType)
         this.postprocessingRules.forEach(rule => {
             let previous;
             while (previous !== cleaned) {
