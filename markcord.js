@@ -167,16 +167,19 @@ const markcord = {
         let string = node[0]
         if (typeof(node[0]) === "string") {
             const originalString = string
-            let ruleOrder = [ ...rules ].filter(item => !markcord.types.highPriorityRuleNames.includes(item[2]))
-            ruleOrder = [
-                ...markcord.types.highPriorityRules.filter(item => rules.includes(item)),
-                ...ruleOrder
-            ]
-            ruleOrder = ruleOrder.map(rule => [rule[0].exec(string), rule]).filter(item => item[0] !== null).sort((a, b) => b[0][0].length - a[0][0].length)
+            const ruleOrder = [ ...rules ].map(rule => [rule[0].exec(string), rule]).filter(item => item[0] !== null)
+                                          .sort((a, b) => {
+            if (a[1][3] === "maskedURLs" && b[1][2] === "URLs" || a[1][2] === "noEmbedURLs" && b[1][2] === "URLs" || a[1][2] === "noEmbedMaskedURLs" && b[1][2] === "maskedURLs" || a[1][2] === "codeblock" && b[1][2] === "pre") {
+                return -1
+            } else if (a[1][2] === "URLs" && b[1][2] === "maskedURLs" || a[1][2] === "URLs" && b[1][2] === "noEmbedURLs" || a[1][2] === "maskedURLs" && b[1][2] === "noEmbedMaskedURLs" || a[1][2] === "pre" && b[1][2] === "codeblock") {
+                return 1
+            }
+            return b[0][0].length - a[0][0].length
+            })
             if (ruleOrder.length === 0) {
                 extendedNode[0] = node[0]
             } else {
-                ruleOrder.forEach(ruleset => { 
+                ruleOrder.forEach(ruleset => {
                     let result = []
                     let previous;
                     while (result !== previous && result) {
@@ -238,15 +241,6 @@ const markcord = {
     },
     except: (what, inside) => inside.filter(item => item !== what)
 }
-markcord.types.highPriorityRuleNames = ["codeblock", "pre", "noEmbedMaskedURLs", "maskedURLs", "noEmbedURLs", "URLs"]
-markcord.types.highPriorityRules = [
-    markcord.regexRules.codeblock,
-    markcord.regexRules.pre,
-    markcord.regexRules.noEmbedMaskedURLs,
-    markcord.regexRules.maskedURLs,
-    markcord.regexRules.noEmbedURLs,
-    markcord.regexRules.URLs
-]
 markcord.types.generic = [
     markcord.regexRules.noEmbedMaskedURLs,
     markcord.regexRules.maskedURLs,
